@@ -30,7 +30,7 @@ log <- data %>%
 
 ```{r}
 log %>%
-  slice(1:2000) %>%
+  slice(1:5000) %>%
   process_map()
 ```
 
