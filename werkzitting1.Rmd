@@ -8,11 +8,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(bupaR)
 library(lubridate)
 library(dplyr)
-<<<<<<< HEAD
 library(stringr)
-=======
 library(ggplot2)
->>>>>>> db60a20a8c1433dd71a6f9c884131061eb967ea0
 ```
 
 ```{r}
