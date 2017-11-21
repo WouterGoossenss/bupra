@@ -8,7 +8,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(bupaR)
 library(lubridate)
 library(dplyr)
+<<<<<<< HEAD
 library(stringr)
+=======
+library(ggplot2)
+>>>>>>> db60a20a8c1433dd71a6f9c884131061eb967ea0
 ```
 
 ```{r}
@@ -31,11 +35,7 @@ log <- data %>%
 
 ```{r}
 log %>%
-<<<<<<< HEAD
   slice(1:3000) %>%
-=======
-  slice(1:5000) %>%
->>>>>>> bc6647989e809b92322003fa26ff8280574a1583
   process_map()
 ```
 
