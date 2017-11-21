@@ -1,0 +1,37 @@
+---
+title: "Werkzitting 1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(bupaR)
+library(lubridate)
+library(dplyr)
+```
+
+```{r}
+data <- data %>%
+  mutate(Timestamp = ymd_hms(substr(`Complete Timestamp`, 1, nchar(`Complete Timestamp`) - 4))) %>%
+  mutate(activity_instance_id = row_number())
+```
+
+```{r}
+log <- data %>%
+  eventlog(
+    case_id = "Case ID",
+    activity_id = "Activity",
+    activity_instance_id = "activity_instance_id",
+    lifecycle_id = "lifecycle:transition",
+    timestamp = "Timestamp",
+    resource_id = "Resource"
+  )
+```
+
+```{r}
+log %>%
+  slice(1:1000) %>%
+  process_map()
+```
+
+
