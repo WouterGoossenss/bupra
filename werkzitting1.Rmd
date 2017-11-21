@@ -8,6 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(bupaR)
 library(lubridate)
 library(dplyr)
+library(stringr)
 ```
 
 ```{r}
