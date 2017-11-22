@@ -15,13 +15,14 @@ library(ggplot2)
 ```{r}
 data <- data %>%
   mutate(Timestamp = ymd_hms(substr(`Complete Timestamp`, 1, nchar(`Complete Timestamp`) - 4))) %>%
-  mutate(activity_instance_id = row_number())
+  mutate(activity_instance_id = row_number()) %>%
+  mutate(case_id = `Case ID`) %>% select(-`Case ID`)
 ```
 
 ```{r}
 log <- data %>%
   eventlog(
-    case_id = "Case ID",
+    case_id = "case_id",
     activity_id = "Activity",
     activity_instance_id = "activity_instance_id",
     lifecycle_id = "lifecycle:transition",
@@ -35,5 +36,12 @@ log %>%
   slice(1:3000) %>%
   process_map()
 ```
+
+```{r}
+log %>%
+  trace_explorer(coverage = 0.9)
+  
+```
+
 
 
