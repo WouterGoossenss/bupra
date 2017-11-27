@@ -147,11 +147,17 @@ log %>%
   resource_map()
 ```
 
+##Managementsamenvatting
 
-## Onderzoeksvragen
+##Inhoudstafel
 
+##Inleiding
 
+##Resultaten
 
+##Beperkingen
+
+##Conclusie
 
 
 
