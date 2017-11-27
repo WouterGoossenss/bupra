@@ -153,7 +153,23 @@ log %>%
 
 ##Inleiding
 
+Lifecycle:transaction -> nutteloos attribuut (altijd 'complete')
+
+Variant index -> identifier van de trace
+
 ##Resultaten
+
+1. Hoeveel van de betalingen worden niet correct uitgevoerd?
+
+2. Welke activiteiten moeten vaak opnieuw worden uitgevoerd?
+
+3. Hoe lang duren de verschillende activiteiten?
+
+4. Wat zorgt ervoor dat cases langer duren?
+
+5. Welke diagnose duurt het langst om vast te stellen? (gepikt van Quinten & Leen)
+
+6. Welke traces eindigen vaak geblokkeerd?
 
 ##Beperkingen
 
