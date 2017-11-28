@@ -25,7 +25,8 @@ data <- read_delim("data.csv",
 data <- data %>%
   mutate(Timestamp = ymd_hms(substr(`Complete Timestamp`, 1, nchar(`Complete Timestamp`) - 4))) %>%
   mutate(activity_instance_id = row_number()) %>%
-  mutate(case_id = `Case ID`) %>% select(-`Case ID`)
+  mutate(case_id = `Case ID`) %>% select(-`Case ID`) %>%
+  select(case_id, 1:26)
 ```
 
 ```{r}
