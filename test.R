@@ -1,6 +1,22 @@
 test <- log %>%
-  group_by(`Variant index`, caseType) %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(case_id) %>%
   summarise(
-    abs_freq = n()
+    n = n()
   ) %>%
-  mutate(rel_freq = abs_freq / sum(abs_freq))
+  filter(n > 1) %>%
+  left_join(
+    log %>%
+      select(case_id, diagnosis, activity_instance_id, Activity) %>%
+      filter(!is.na(diagnosis))
+  ) %>%
+  filter(Activity == "CHANGE DIAGN") %>%
+  mutate(wrong_diagnosis = ifelse(case_id == lead(case_id), T, F)) %>%
+  filter(wrong_diagnosis == T) %>%
+  select(diagnosis, wrong_diagnosis) %>%
+  group_by(diagnosis, wrong_diagnosis) %>%
+  summarise(
+    frequency = n()
+  ) %>%
+  arrange(-frequency) %>%
+  select(-wrong_diagnosis)

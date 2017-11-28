@@ -16,7 +16,6 @@ library(ggplot2)
 library(readr)
 data <- read_delim("data.csv", 
     ";", escape_double = FALSE, trim_ws = TRUE)
-<<<<<<< HEAD
 ```
 
 ```{r}
@@ -149,12 +148,6 @@ log %>%
 ```
 
 
-## Onderzoeksvragen
-
-
-
-=======
-```
 
 ```{r}
 data <- data %>%
@@ -297,7 +290,17 @@ Variant index -> identifier van de trace
 
 ##Resultaten
 
-1. Hoeveel van de betalingen worden niet correct uitgevoerd?
+1. Hoeveel facturen worden uiteindelijk niet betaald?
+
+```{r}
+log %>%
+  group_by(case_id) %>%
+  summarise(
+    last_activity = last(Activity)
+  ) %>%
+  filter(last_activity != "BILLED")
+
+```
 
 2. Welke activiteiten moeten vaak opnieuw worden uitgevoerd?
 
@@ -309,10 +312,69 @@ Variant index -> identifier van de trace
 
 6. Welke traces eindigen vaak geblokkeerd?
 
+7. Welke diagnose wordt later het vaakst veranderd?
+
+```{r}
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(case_id) %>%
+  summarise(
+    n = n()
+  ) %>%
+  filter(n > 1) %>%
+  left_join(
+    log %>%
+      select(case_id, diagnosis, activity_instance_id, Activity) %>%
+      filter(!is.na(diagnosis))
+  ) %>%
+  filter(Activity == "CHANGE DIAGN") %>%
+  mutate(wrong_diagnosis = ifelse(case_id == lead(case_id), T, F)) %>%
+  filter(wrong_diagnosis == T) %>%
+  select(diagnosis, wrong_diagnosis) %>%
+  group_by(diagnosis, wrong_diagnosis) %>%
+  summarise(
+    frequency = n()
+  ) %>%
+  arrange(-frequency) %>%
+  select(-wrong_diagnosis)
+```
+
+8. Welke eerste diagnose was vaak toch de juiste?
+
+9. Welke diagnoses volgen mekaar vaak op?
+
+```{r}
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(case_id) %>%
+  summarise(
+    n = n()
+  ) %>%
+  filter(n > 1) %>%
+  left_join(
+    log %>%
+      select(case_id, diagnosis, activity_instance_id, Activity) %>%
+      filter(!is.na(diagnosis))
+  ) %>%
+  arrange(-n, case_id, activity_instance_id) %>%
+  filter(Activity == "CHANGE DIAGN") %>%
+  mutate(previous_diagnosis = ifelse(case_id == lag(case_id), lag(diagnosis), NA)) %>%
+  select(previous_diagnosis, diagnosis, case_id) %>%
+  filter(!is.na(previous_diagnosis)) %>%
+  group_by(previous_diagnosis, diagnosis) %>%
+  summarise(
+    frequency = n()
+  ) %>%
+  arrange(-frequency)
+```
+
+10. Hoe vaak zijn dokters het niet helemaal eens over de diagnose?
+
+11. Hoevaak wordt een eerst afgewezen diagnose, toch opnieuw gesteld?
+
 ##Beperkingen
 
 ##Conclusie
->>>>>>> becff12f1a0d8bec07a77050c95d3f3aaa8b266b
 
 
 
