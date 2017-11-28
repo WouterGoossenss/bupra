@@ -16,6 +16,10 @@ library(ggplot2)
 library(readr)
 data <- read_delim("data.csv", 
     ";", escape_double = FALSE, trim_ws = TRUE)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 0fe36ca9c11ca74ba6bbad1c71f69cea66e5c6f9
 ```
 
 ```{r}
@@ -147,7 +151,17 @@ log %>%
   resource_map()
 ```
 
+<<<<<<< HEAD
 
+=======
+
+## Onderzoeksvragen
+
+
+
+=======
+```
+>>>>>>> 0fe36ca9c11ca74ba6bbad1c71f69cea66e5c6f9
 
 ```{r}
 data <- data %>%
@@ -279,6 +293,7 @@ log %>%
 ```
 
 ##Managementsamenvatting
+<<<<<<< HEAD
 
 ##Inhoudstafel
 
@@ -308,10 +323,32 @@ log %>%
 
 4. Wat zorgt ervoor dat cases langer duren?
 
+=======
+
+##Inhoudstafel
+
+##Inleiding
+
+Lifecycle:transaction -> nutteloos attribuut (altijd 'complete')
+
+Variant index -> identifier van de trace
+
+##Resultaten
+
+1. Hoeveel van de betalingen worden niet correct uitgevoerd?
+
+2. Welke activiteiten moeten vaak opnieuw worden uitgevoerd?
+
+3. Hoe lang duren de verschillende activiteiten?
+
+4. Wat zorgt ervoor dat cases langer duren?
+
+>>>>>>> 0fe36ca9c11ca74ba6bbad1c71f69cea66e5c6f9
 5. Welke diagnose duurt het langst om vast te stellen? (gepikt van Quinten & Leen)
 
 6. Welke traces eindigen vaak geblokkeerd?
 
+<<<<<<< HEAD
 7. Welke diagnose wordt later het vaakst veranderd?
 
 ```{r}
@@ -375,6 +412,12 @@ log %>%
 ##Beperkingen
 
 ##Conclusie
+=======
+##Beperkingen
+
+##Conclusie
+>>>>>>> becff12f1a0d8bec07a77050c95d3f3aaa8b266b
+>>>>>>> 0fe36ca9c11ca74ba6bbad1c71f69cea66e5c6f9
 
 
 
