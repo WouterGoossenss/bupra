@@ -173,6 +173,7 @@ log %>%
 
 10. Hoe vaak zijn dokters het niet helemaal eens over de diagnose?
 
+
 11. Hoe vaak wordt een eerst afgewezen diagnose, toch opnieuw gesteld?
 ```{r}
 # alle diagnoses die meer dan één keer gesteld worden binnen een case
@@ -202,6 +203,24 @@ log %>%
   filter(diagnosis == "Z") %>%
   group_by(case_id) %>%
   summarise(n = n())
+```
+12. Hoeveel tijd zit er tussen de goedkeuring en betaling van een factuur?
+
+
+```{r}
+log %>%
+  filter(Activity %in% c("CODE OK", "BILLED")) %>%
+   group_by(case_id, Activity) %>%
+  summarise(
+    Timestamp = last(`Complete Timestamp`)
+  ) %>%
+  spread(Activity, Timestamp) %>%
+  slice(1:10) %>%
+  filter(!is.na(BILLED)) %>%
+  filter(!is.na(`CODE OK`)) %>%
+  mutate(BILLED = ymd_hms(BILLED)) %>%
+  mutate(`CODE OK` = ymd_hms(`CODE OK`))
+ 
 ```
 
 
