@@ -28,19 +28,17 @@ test <- test[[2]] %>%
   ) %>%
   left_join(
     log %>%
-      select(case_id, Timestamp, activity_instance_id)
+      select(case_id, Timestamp, activity_instance_id, Activity)
   ) %>%
   arrange(-relative_frequency, case_id, activity_instance_id) %>%
   mutate(duration = ifelse(case_id == lead(case_id), lead(Timestamp) - Timestamp, NA)) %>%
-  group_by(trace_id) %>%
+  group_by(trace_id, Activity) %>%
   summarise(
-    mean_duration = mean(duration, na.rm = T),
-    rel = first(relative_frequency)
+    mean_duration = mean(duration, na.rm = T)
   ) %>%
-  arrange(-rel) %>%
-  slice(1:10) %>%
-  mutate(sum_duration = mean_duration * rel) %>%
-  summarise(
-    duration = sum(sum_duration, na.rm = T)
-  ) %>%
-  mutate(duration = seconds_to_period(duration))
+  mutate(mean_duration = ifelse(mean_duration != "NaN", mean_duration, 0))
+
+test <- test %>%
+  select(trace_id, Activity, mean_duration) %>%
+  
+

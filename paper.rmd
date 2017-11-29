@@ -33,7 +33,7 @@ log <- data %>%
 
 ##Managementsamenvatting
 
-Om een beter inzicht te krijgen in het facturatieproces van een ziekenhuis, namen wij de dataset 'Hospital Billing' onder de loop. We starten onze analyse met het samenvatten van enkele belangrijke elementen uit deze dataset. De dataset (of log) bevat informatie over 451.359 activiteiten die precies 100.000 gevallen beschrijven. Deze activiteiten worden uitgevoerd door 1151 verschillende medewerkers. Er zijn 1.022 verschillende manieren (traces) waarop een geval kan worden doorlopen. De 10 meest voorkomende traces nemen samen 91.3% van de totale log in.
+Om een beter inzicht te krijgen in het facturatieproces van een ziekenhuis, namen wij de dataset 'Hospital Billing' onder de loop. We starten onze analyse met het samenvatten van enkele belangrijke elementen uit deze dataset. De dataset (of log) bevat informatie over 451.359 activiteiten die precies 100.000 gevallen (of cases) beschrijven. Deze activiteiten worden uitgevoerd door 1151 verschillende medewerkers. Er zijn 1.022 verschillende manieren (traces) waarop een geval kan worden doorlopen. De 10 meest voorkomende traces nemen samen 91.3% van de totale log in.
 
 ```{r}
 log %>%
@@ -41,7 +41,7 @@ log %>%
   plot
 ```
 
-De gemiddelde doorlooptijd bij deze gevallen is 30 dagen, terwijl de gemiddelde doorlooptijd over de hele log gemiddeld 127 dagen bedraagt.
+De gemiddelde doorlooptijd bij deze cases is 30 dagen, terwijl de gemiddelde doorlooptijd over de hele log gemiddeld 127 dagen bedraagt.
 
 De log bevat 18 soorten activiteiten waaronder de belangrijkste zijn:
   - 'NEW': het aanmaken van een factuur
@@ -63,11 +63,33 @@ log %>%
 
 ##Inleiding
 
+De 'Hospital Billing' log bestaat uit 25 verschillende attributen. We vatten deze kort samen in de tabel #:
 
-
-Lifecycle:transaction -> nutteloos attribuut (altijd 'complete')
-
-Variant index -> identifier van de trace
+  - Case ID: de unieke waarde die aan iedere case wordt toegewezen
+  - Activity: de naam van de activiteit die werd uitgevoerd
+  - Resource: de naam van de persoon die deze activiteit heeft uitgevoerd
+  - Complete Timestamp: het tijdstip waarop de activeit werd afgerond
+  - Variant: een waarde om aan te duiden wij welk soort trace de case hoort
+  - Variant index: enkel de numerieke waarde van variant
+  - actOrange
+  - actRed
+  - blocked
+  - caseType
+  - closeCode
+  - diagnosis
+  - flagA
+  - flagB
+  - flagC
+  - flagD
+  - isCancelled
+  - isClosed
+  - lifecycle:transition
+  - msgCode
+  - msgCount
+  - msgType
+  - speciality
+  - state
+  - version
 
 ##Resultaten
 
@@ -89,7 +111,7 @@ log %>%
 
 4. Wat zorgt ervoor dat cases langer duren? (bottlenecks)
 
-5. Welke diagnose duurt het langst om vast te stellen? (gepikt van Quinten & Leen)
+
 
 6. Welke traces eindigen vaak geblokkeerd?
 
