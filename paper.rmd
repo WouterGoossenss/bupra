@@ -214,12 +214,15 @@ log %>%
   summarise(
     Timestamp = last(`Complete Timestamp`)
   ) %>%
+  ungroup() %>%
   spread(Activity, Timestamp) %>%
   slice(1:10) %>%
   filter(!is.na(BILLED)) %>%
   filter(!is.na(`CODE OK`)) %>%
   mutate(BILLED = ymd_hms(BILLED)) %>%
-  mutate(`CODE OK` = ymd_hms(`CODE OK`))
+  mutate(`CODE OK` = ymd_hms(`CODE OK`)) %>%
+  mutate(difference = BILLED - `CODE OK`) %>%
+  summarise(avg = mean(difference))
  
 ```
 
