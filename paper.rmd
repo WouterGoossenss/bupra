@@ -173,7 +173,37 @@ log %>%
 
 10. Hoe vaak zijn dokters het niet helemaal eens over de diagnose?
 
-11. Hoevaak wordt een eerst afgewezen diagnose, toch opnieuw gesteld?
+11. Hoe vaak wordt een eerst afgewezen diagnose, toch opnieuw gesteld?
+```{r}
+# alle diagnoses die meer dan één keer gesteld worden binnen een case
+log %>%
+  group_by(case_id, diagnosis) %>%
+  filter(!is.na(diagnosis)) %>%
+  summarise(
+    abs_freq = n()
+  ) %>%
+  filter(abs_freq > 1) 
+
+# hoe vaak wordt een diagnose meer dan één keer gesteld?
+log %>%
+  group_by(case_id, diagnosis) %>%
+  filter(!is.na(diagnosis)) %>%
+  summarise(
+    abs_freq = n()
+  ) %>%
+  filter(abs_freq > 1) %>%
+  group_by(diagnosis) %>%
+  summarise(abs_freq = n()) %>%
+  arrange(-abs_freq)
+```
+
+```{r}
+log %>%
+  filter(diagnosis == "Z") %>%
+  group_by(case_id) %>%
+  summarise(n = n())
+```
+
 
 ##Beperkingen
 
