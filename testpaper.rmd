@@ -1,0 +1,277 @@
+---
+title: "testpaper.rmd"
+author: "Wouter Goossens, Daan Roosen"
+date: "29-11-2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(bupaR)
+library(lubridate)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(readr)
+data <- read_delim("data.csv", 
+    ";", escape_double = FALSE, trim_ws = TRUE)
+```
+
+```{r}
+data <- data %>%
+  mutate(Timestamp = ymd_hms(substr(`Complete Timestamp`, 1, nchar(`Complete Timestamp`) - 4))) %>%
+  mutate(activity_instance_id = row_number()) %>%
+  mutate(case_id = `Case ID`) %>% select(-`Case ID`)
+```
+
+```{r}
+log <- data %>%
+  eventlog(
+    case_id = "case_id",
+    activity_id = "Activity",
+    activity_instance_id = "activity_instance_id",
+    lifecycle_id = "lifecycle:transition",
+    timestamp = "Timestamp",
+    resource_id = "Resource"
+  )
+```
+
+## Beschrijving data
+
+Aantal cases:
+
+```{r}
+log %>%
+  n_cases()
+```
+
+Aantal events:
+
+```{r}
+log %>%
+  n_events()
+```
+
+Aantal resources:
+
+```{r}
+log %>%
+  n_resources()
+```
+
+Activiteiten:
+
+```{r}
+log %>%
+  activities()
+```
+
+Resources:
+
+```{r}
+log %>%
+  resources()
+```
+
+Structuur van de traces in de eventlog:
+
+```{r}
+log %>%
+  trace_coverage("trace") %>%
+  plot
+```
+
+Startactiviteiten:
+
+```{r}
+log %>%
+  start_activities("activity")
+```
+
+Eindactiviteiten:
+
+```{r}
+log %>%
+  end_activities("activity")
+```
+
+Activiteiten die opnieuw worden gedaan door dezelfde persoon:
+
+```{r}
+log %>% number_of_repetitions(type = "repeat", "activity") %>%
+	arrange(-relative)
+```
+
+
+Activiteiten die opnieuw worden gedaan maar door een andere persoon:
+
+```{r}
+log %>% number_of_repetitions(type = "redo", "activity") %>%
+	arrange(-relative)
+```
+
+Throughput time:
+
+```{r}
+log %>%
+  throughput_time()
+```
+
+```{r}
+log %>%
+  throughput_time() %>%
+  plot
+```
+
+Verdeling van het aantal cases per dag:
+
+```{r}
+log %>%
+	mutate(day_of_week = wday(Timestamp, label = T)) %>%
+	ggplot(aes(day_of_week)) +
+	geom_bar()
+```
+
+Welke belangrijke resources zijn aanwezig in iedere case:
+
+```{r}
+log %>%
+	filter_resource_frequency(perc = 0.85) %>%
+  resource_involvement("resource")
+```
+
+```{r}
+log %>%
+	filter_resource_frequency(perc = 0.9) %>%
+  resource_map()
+```
+
+```{r}
+data <- data %>%
+  mutate(Timestamp = ymd_hms(substr(`Complete Timestamp`, 1, nchar(`Complete Timestamp`) - 4))) %>%
+  mutate(activity_instance_id = row_number()) %>%
+  mutate(case_id = `Case ID`) %>% select(-`Case ID`)
+```
+
+```{r}
+log <- data %>%
+  eventlog(
+    case_id = "case_id",
+    activity_id = "Activity",
+    activity_instance_id = "activity_instance_id",
+    lifecycle_id = "lifecycle:transition",
+    timestamp = "Timestamp",
+    resource_id = "Resource"
+  )
+```
+
+## Beschrijving data
+
+Aantal cases:
+
+```{r}
+log %>%
+  n_cases()
+```
+
+Aantal events:
+
+```{r}
+log %>%
+  n_events()
+```
+
+Aantal resources:
+
+```{r}
+log %>%
+  n_resources()
+```
+
+Activiteiten:
+
+```{r}
+log %>%
+  activities()
+```
+
+Resources:
+
+```{r}
+log %>%
+  resources()
+```
+
+Structuur van de traces in de eventlog:
+
+```{r}
+log %>%
+  trace_coverage("trace") %>%
+  plot
+```
+
+Startactiviteiten:
+
+```{r}
+log %>%
+  start_activities("activity")
+```
+
+Eindactiviteiten:
+
+```{r}
+log %>%
+  end_activities("activity")
+```
+
+Activiteiten die opnieuw worden gedaan door dezelfde persoon:
+
+```{r}
+log %>% number_of_repetitions(type = "repeat", "activity") %>%
+	arrange(-relative)
+```
+
+
+Activiteiten die opnieuw worden gedaan maar door een andere persoon:
+
+```{r}
+log %>% number_of_repetitions(type = "redo", "activity") %>%
+	arrange(-relative)
+```
+
+Throughput time:
+
+```{r}
+log %>%
+  throughput_time()
+```
+
+```{r}
+log %>%
+  throughput_time() %>%
+  plot
+```
+
+Verdeling van het aantal cases per dag:
+
+```{r}
+log %>%
+	mutate(day_of_week = wday(Timestamp, label = T)) %>%
+	ggplot(aes(day_of_week)) +
+	geom_bar()
+```
+
+Welke belangrijke resources zijn aanwezig in iedere case:
+
+```{r}
+log %>%
+	filter_resource_frequency(perc = 0.85) %>%
+  resource_involvement("resource")
+```
+
+```{r}
+log %>%
+	filter_resource_frequency(perc = 0.9) %>%
+  resource_map()
+```

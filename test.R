@@ -1,22 +1,46 @@
+# test <- log %>%
+#   mutate(duration = ifelse(case_id == lead(case_id), seconds_to_period(lead(Timestamp) - Timestamp), 0)) %>%
+#   select(case_id, Activity, Timestamp, duration)
+
+# test <- log %>%
+#   mutate(duration = ifelse(case_id == lead(case_id), lead(Timestamp) - Timestamp, NA)) %>%
+#   group_by(case_id) %>%
+#   summarise(
+#     duration = mean(duration, na.rm = T)
+#   ) %>%
+#   left_join(
+#     log %>%
+#       select(case_id, `Variant index`)
+#   ) %>%
+#   group_by(`Variant index`) %>%
+#   summarise(
+#     mean_duration = mean(duration, na.rm = T)
+#   ) %>%
+#   mutate(mean_duration = seconds_to_period(mean_duration))
+
 test <- log %>%
-  filter(!is.na(diagnosis)) %>%
-  group_by(case_id) %>%
-  summarise(
-    n = n()
+  traces(output_cases = T)
+
+test <- test[[2]] %>%
+  left_join(
+    test[[1]],
+    by = c("trace_id", "trace_id")
   ) %>%
-  filter(n > 1) %>%
   left_join(
     log %>%
-      select(case_id, diagnosis, activity_instance_id, Activity) %>%
-      filter(!is.na(diagnosis))
+      select(case_id, Timestamp, activity_instance_id)
   ) %>%
-  filter(Activity == "CHANGE DIAGN") %>%
-  mutate(wrong_diagnosis = ifelse(case_id == lead(case_id), T, F)) %>%
-  filter(wrong_diagnosis == T) %>%
-  select(diagnosis, wrong_diagnosis) %>%
-  group_by(diagnosis, wrong_diagnosis) %>%
+  arrange(-relative_frequency, case_id, activity_instance_id) %>%
+  mutate(duration = ifelse(case_id == lead(case_id), lead(Timestamp) - Timestamp, NA)) %>%
+  group_by(trace_id) %>%
   summarise(
-    frequency = n()
+    mean_duration = mean(duration, na.rm = T),
+    rel = first(relative_frequency)
   ) %>%
-  arrange(-frequency) %>%
-  select(-wrong_diagnosis)
+  arrange(-rel) %>%
+  slice(1:10) %>%
+  mutate(sum_duration = mean_duration * rel) %>%
+  summarise(
+    duration = sum(sum_duration, na.rm = T)
+  ) %>%
+  mutate(duration = seconds_to_period(duration))
