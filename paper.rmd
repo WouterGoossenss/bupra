@@ -161,6 +161,16 @@ log %>%
 ```
 
 8. Welke eerste diagnose was vaak toch de juiste?
+```{r}
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  select(case_id) %>%
+  group_by(case_id) %>%
+  summarise(n = n()) %>%
+  filter(n == 1)
+ 
+```
+
 
 9. Welke diagnoses volgen mekaar vaak op?
 
@@ -190,6 +200,22 @@ log %>%
 ```
 
 10. Hoe vaak zijn dokters het niet helemaal eens over de diagnose?
+```{r}
+log %>%
+  filter(Activity %in% c("CHANGE DIAGN", "NEW")) %>%
+  group_by(case_id) %>%
+  filter(!is.na(Resource)) %>%
+  summarise(
+    n = n()
+  ) %>%
+  filter(n > 1) %>%
+  inner_join(log) %>%
+  select(case_id, Activity, Resource) %>%
+  filter(!is.na(Resource)) %>%
+  filter(Activity %in% c("CHANGE DIAGN", "NEW")) %>%
+  mutate(akkoord = ifelse(Activity == "NEW", "NEW", ifelse(Resource == lag(Resource), "akkoord", "niet akkoord"))) 
+  
+```
 
 
 11. Hoe vaak wordt een eerst afgewezen diagnose, toch opnieuw gesteld?
