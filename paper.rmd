@@ -33,7 +33,7 @@ log <- data %>%
 
 ##Managementsamenvatting
 
-Om een beter inzicht te krijgen in het facturatieproces van een ziekenhuis, namen wij de dataset 'Hospital Billing' onder de loop. We starten onze analyse met het samenvatten van enkele belangrijke elementen uit deze dataset. De dataset (of log) bevat informatie over 451.359 activiteiten die precies 100.000 gevallen (of cases) beschrijven. Deze activiteiten worden uitgevoerd door 1.151 verschillende medewerkers. Er zijn 1.022 verschillende manieren (traces) waarop een geval kan worden doorlopen. De 10 meest voorkomende traces nemen samen 91.3% van de totale log in.
+Om een beter inzicht te krijgen in het facturatieproces van een ziekenhuis, namen wij de dataset 'Hospital Billing' onder de loop. We starten onze analyse met het samenvatten van enkele belangrijke elementen uit deze dataset. De dataset (of log) bevat informatie over 451.359 activiteiten die precies 100.000 gevallen (of cases) beschrijven. Deze activiteiten worden uitgevoerd door 1151 verschillende medewerkers. Er zijn 1.022 verschillende manieren (traces) waarop een geval kan worden doorlopen. De 10 meest voorkomende traces nemen samen 91.3% van de totale log in.
 
 ```{r}
 log %>%
@@ -97,42 +97,23 @@ De 'Hospital Billing' log bestaat uit 25 verschillende attributen. We vatten dez
 
 ```{r}
 log %>%
-  filter(Activity == "BILLED") %>%
   group_by(case_id) %>%
   summarise(
-    n = n()
+    last_activity = last(Activity)
   ) %>%
-  group_by() %>%
-  summarise(
-    abs_freq = sum(n)
-  ) %>%
-  mutate(rel_freq = abs_freq / n_cases(log))
+  filter(last_activity != "BILLED")
+
 ```
 
 2. Welke activiteiten moeten vaak opnieuw worden uitgevoerd?
 
-```{r}
-log %>%
-  number_of_repetitions(type = "redo", "activity") %>%
-  left_join(
-    log %>%
-      number_of_repetitions(type = "repeat", "activity"),
-    by = c("Activity" = "Activity")
-  ) %>%
-  mutate(Frequency = absolute.x + absolute.y) %>%
-  select(Activity, Frequency) %>%
-  arrange(-Frequency)
-```
-
 3. Hoe lang duren de verschillende activiteiten?
 
-```{r}
-log %>%
-  processing_time("case")
-```
-
-
 4. Wat zorgt ervoor dat cases langer duren? (bottlenecks)
+
+
+
+6. Welke traces eindigen vaak geblokkeerd?
 
 7. Welke diagnose wordt later het vaakst veranderd?
 
@@ -162,6 +143,16 @@ log %>%
 ```
 
 8. Welke eerste diagnose was vaak toch de juiste?
+```{r}
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  select(case_id) %>%
+  group_by(case_id) %>%
+  summarise(n = n()) %>%
+  filter(n == 1)
+ 
+```
+
 
 9. Welke diagnoses volgen mekaar vaak op?
 
@@ -191,6 +182,22 @@ log %>%
 ```
 
 10. Hoe vaak zijn dokters het niet helemaal eens over de diagnose?
+```{r}
+log %>%
+  filter(Activity %in% c("CHANGE DIAGN", "NEW")) %>%
+  group_by(case_id) %>%
+  filter(!is.na(Resource)) %>%
+  summarise(
+    n = n()
+  ) %>%
+  filter(n > 1) %>%
+  inner_join(log) %>%
+  select(case_id, Activity, Resource) %>%
+  filter(!is.na(Resource)) %>%
+  filter(Activity %in% c("CHANGE DIAGN", "NEW")) %>%
+  mutate(akkoord = ifelse(Activity == "NEW", "NEW", ifelse(Resource == lag(Resource), "akkoord", "niet akkoord"))) 
+  
+```
 
 
 11. Hoe vaak wordt een eerst afgewezen diagnose, toch opnieuw gesteld?
