@@ -3,8 +3,8 @@ title: "Project BUPRA"
 author: "Wouter Goossens, Daan Roosen"
 date: "22-11-2017"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
   word_document: default
 ---
 
@@ -271,7 +271,7 @@ log %>%
 
 # Analyse diagnoses
 
-In de log komen 1191 verschillende diagnoses voor. De diagnoses "PD" en "SB" worden het vaakst gesteld. 
+In de log komen 1191 verschillende diagnoses voor. De diagnoses "PD" en "SB" worden het vaakst gesteld.
 
 ```{r}
 log %>%
@@ -281,7 +281,135 @@ log %>%
   arrange(-abs_freq)
 ```
 
-Aantal keren dat een diagnose als eerste werd gesteld
+Tijdens het billing proces kan de diagnose van een bepaalde case nog gewijzigd worden. In ongeveer 72 % van de cases is de eerste diagnose de juiste en in 4,29 % van de cases wordt de eerste diagnose één keer gewijzigd. Het blijkt dat de eerste of twee diagnose meestal de juist is aangezien in amper 0,4 % van de gevallen 3 of meer diagnoses nodig zijn. Over iets meer dan 23 % van de cases is geen informatie bekend inzake de diagnoses. 
+
+```{r}
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(case_id) %>%
+  summarise(n = n()) %>%
+  filter(n == 1) %>%
+  summarise(n = n())
+
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(case_id) %>%
+  summarise(n = n()) %>%
+  filter(n > 1) %>%
+  summarise(n = n())
+
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(case_id) %>%
+  summarise(n = n()) %>%
+  filter(n > 2) %>%
+  summarise(n = n())
+
+```
+
+We weten nu dat in ongeveer 5 % van de cases de initiële diagnose gewijzigd wordt. Nu kijken we verder naar de diagnoses zelf. Zijn er bijvoorbeeld diagnoses die nadat ze gesteld werden, vaak gewijzigd worden?
+De onderstaande tabel geeft de diagnoses weer die het vaakst gewijzigd werden op basis van de relative frequentie. Diagnose wordt bijvoorbeeld in 50 % van de gevallen achteraf gewijzigd.
+
+```{r}
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(case_id) %>%
+  summarise(
+    n = n()
+  ) %>%
+  filter(n > 1) %>%
+  left_join(
+    log %>%
+      select(case_id, diagnosis, activity_instance_id, Activity) %>%
+      filter(!is.na(diagnosis))
+  ) %>%
+  filter(Activity == "CHANGE DIAGN") %>%
+  mutate(wrong_diagnosis = ifelse(case_id == lead(case_id), T, F)) %>%
+  filter(wrong_diagnosis == T) %>%
+  select(diagnosis, wrong_diagnosis) %>%
+  group_by(diagnosis, wrong_diagnosis) %>%
+  summarise(
+    frequency = n()
+  ) %>%
+  arrange(-frequency) %>%
+  select(-wrong_diagnosis) %>%
+  inner_join(
+    log %>% 
+      filter(!is.na(diagnosis)) %>%
+      group_by(diagnosis) %>%
+      summarise(total_number = n())
+  ) %>%
+  mutate(relative = frequency/total_number) %>%
+  filter(total_number > 50) %>%
+  arrange(-relative)
+```
+
+Er zijn dus een aantal diagnoses die vaak niet de finale diagnose zijn. Aangezien 72 % van de cases maar één diagnose bevat, verwachten we dat er een aantal diagnoses zijn die vrijwel nooit veranderd worden. Dit blijkt ook zo uit de analyse van de eventlog. In onderstaande tabel zien we dat bijvoorbeeld diagnose FA 1094 keer gesteld is, en evenveel keer was het de finale diagnose voor die patiënt. 
+
+```{r}
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(case_id) %>%
+  summarise(diagnosis = last(diagnosis)) %>%
+  group_by(diagnosis) %>%
+  summarise(frequency = n()) %>%
+  inner_join(
+    log %>% 
+      filter(!is.na(diagnosis)) %>%
+      group_by(diagnosis) %>%
+      summarise(total_number = n())
+  ) %>%
+  mutate(relative = frequency/total_number) %>%
+  arrange(-relative, -total_number) %>%
+  filter(total_number > 50)
+```
+
+Als we nu nog verder kijken, vinden we een aantal opmerkelijke zaken. Zo zijn er bijvoorbeeld diagnoses die meer dan één keer gesteld worden binnen één en dezelfde case. De tabel geef per diagnose weer in hoeveel cases deze meer dan één keer gesteld is. In totaal zijn er 359 cases waarin een diagnose meer dan één keer gesteld werd. 
+
+```{r}
+log %>%
+  group_by(case_id, diagnosis) %>%
+  filter(!is.na(diagnosis)) %>%
+  summarise(
+    abs_freq = n()
+  ) %>%
+  filter(abs_freq > 1) %>%
+  group_by(diagnosis) %>%
+  summarise(abs_freq = n()) %>%
+  arrange(-abs_freq)
+
+log %>%
+  group_by(case_id, diagnosis) %>%
+  filter(!is.na(diagnosis)) %>%
+  summarise(
+    abs_freq = n()
+  ) %>%
+  filter(abs_freq > 1) %>%
+  group_by(diagnosis) %>%
+  summarise(abs_freq = n()) %>%
+  arrange(-abs_freq) %>%
+  summarise(total = sum(abs_freq))
+
+```
+
+```{r}
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(case_id) %>%
+  summarise(n = n()) %>%
+  filter(n == 1)
+
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(Activity) %>%
+  summarise(n = n())
+
+log %>%
+ filter(case_id %in% log$case_id[log$Activity == "NEW" & is.na(diagnosis)]) %>%
+  filter(Activity == "CHANGE DIAGN") %>%
+  summarise(n = n())
+```
+
 
 ```{r}
 log %>%
