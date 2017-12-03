@@ -392,6 +392,35 @@ log %>%
 
 ```
 
+Tevens zijn er een aantal patronen te ontdekken onder de diagnoses. Sommige diagnoses volgen elkaar vaak op. Deze staan afgebeeld in de volgende tabel.
+
+```{r}
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(case_id) %>%
+  summarise(
+    n = n()
+  ) %>%
+  filter(n > 1) %>%
+  left_join(
+    log %>%
+      select(case_id, diagnosis, activity_instance_id, Activity) %>%
+      filter(!is.na(diagnosis))
+  ) %>%
+  arrange(-n, case_id, activity_instance_id) %>%
+  filter(Activity == "CHANGE DIAGN") %>%
+  mutate(previous_diagnosis = ifelse(case_id == lag(case_id), lag(diagnosis), NA)) %>%
+  select(previous_diagnosis, diagnosis, case_id) %>%
+  filter(!is.na(previous_diagnosis)) %>%
+  group_by(previous_diagnosis, diagnosis) %>%
+  summarise(
+    frequency = n()
+  ) %>%
+  arrange(-frequency)
+```
+
+
+
 ```{r}
 log %>%
   filter(!is.na(diagnosis)) %>%
