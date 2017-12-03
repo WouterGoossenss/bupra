@@ -3,10 +3,12 @@ title: "Project BUPRA"
 author: "Wouter Goossens, Daan Roosen"
 date: "22-11-2017"
 output:
-  html_document: default
-  pdf_document: default
   word_document: default
+  pdf_document: default
+  html_document: default
 ---
+```{r}
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -104,7 +106,8 @@ log %>%
   summarise(
     last_activity = last(Activity)
   ) %>%
-  filter(last_activity != "BILLED")
+  filter(last_activity != "BILLED") %>%
+  summarise(n = n())
 
 ```
 
@@ -156,7 +159,13 @@ log %>%
     frequency = n()
   ) %>%
   arrange(-frequency) %>%
-  select(-wrong_diagnosis)
+  select(-wrong_diagnosis) %>%
+  inner_join(
+    log %>% 
+      filter(!is.na(diagnosis)) %>%
+      group_by(diagnosis) %>%
+      summarise(total_number = n())
+  )
 ```
 
 8. Welke eerste diagnose was vaak toch de juiste?
@@ -265,7 +274,10 @@ log %>%
   mutate(BILLED = ymd_hms(BILLED)) %>%
   mutate(`CODE OK` = ymd_hms(`CODE OK`)) %>%
   mutate(difference = BILLED - `CODE OK`) %>%
-  summarise(avg = mean(difference))
+  summarise(
+    min = min(difference),
+    avg = mean(difference),
+    max = max(difference))
  
 ```
 
@@ -341,7 +353,7 @@ log %>%
   ) %>%
   mutate(relative = frequency/total_number) %>%
   filter(total_number > 50) %>%
-  arrange(-relative)
+  arrange(-relative, -total_number)
 ```
 
 Er zijn dus een aantal diagnoses die vaak niet de finale diagnose zijn. Aangezien 72 % van de cases maar één diagnose bevat, verwachten we dat er een aantal diagnoses zijn die vrijwel nooit veranderd worden. Dit blijkt ook zo uit de analyse van de eventlog. In onderstaande tabel zien we dat bijvoorbeeld diagnose FA 1094 keer gesteld is, en evenveel keer was het de finale diagnose voor die patiënt. 
@@ -419,6 +431,22 @@ log %>%
   arrange(-frequency)
 ```
 
+```{r}
+log %>%
+  group_by(case_id) %>%
+  summarise(
+    begin = first(`Complete Timestamp`),
+    end = last(`Complete Timestamp`)
+  ) %>%
+  mutate(begin = ymd_hms(begin)) %>%
+  mutate(end = ymd_hms(end)) %>%
+  summarise(
+    min = seconds_to_period(min(end - begin)),
+    mean = seconds_to_period(mean(end - begin)),
+    max = max(end - begin)
+  )
+```
+
 
 
 ```{r}
@@ -447,6 +475,17 @@ log %>%
   summarise(diagnosis = first(diagnosis)) %>%
   group_by(diagnosis) %>%
   summarise(n = n()) 
+  
+```
+
+
+
+
+Gemiddelde duurtijd trace
+
+```{r}
+log %>%
+  throughput_time()
   
 ```
 
