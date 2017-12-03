@@ -2,7 +2,10 @@
 title: "Project BUPRA"
 author: "Wouter Goossens, Daan Roosen"
 date: "22-11-2017"
-output: word_document
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -264,6 +267,30 @@ log %>%
   mutate(difference = BILLED - `CODE OK`) %>%
   summarise(avg = mean(difference))
  
+```
+
+# Analyse diagnoses
+
+In de log komen 1191 verschillende diagnoses voor. De diagnoses "PD" en "SB" worden het vaakst gesteld. 
+
+```{r}
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(diagnosis) %>%
+  summarise(abs_freq = n()) %>%
+  arrange(-abs_freq)
+```
+
+Aantal keren dat een diagnose als eerste werd gesteld
+
+```{r}
+log %>%
+  filter(!is.na(diagnosis)) %>%
+  group_by(case_id) %>%
+  summarise(diagnosis = first(diagnosis)) %>%
+  group_by(diagnosis) %>%
+  summarise(n = n()) 
+  
 ```
 
 
